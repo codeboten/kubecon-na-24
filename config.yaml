@@ -1,0 +1,68 @@
+file_format: "0.3"
+enabled: true
+tracer_provider:
+  processors:
+    - simple:
+        exporter:
+          console: {}
+    - batch:
+        exporter:
+          otlp:
+            protocol: http/protobuf
+            endpoint: https://api.honeycomb.io:443
+            headers:
+              - name: x-honeycomb-team
+                value: "${HONEYCOMB_API_KEY}"
+            # Configure compression.
+            compression: gzip
+            # Configure max time (in milliseconds) to wait for each export.
+            timeout: 10000
+            # Configure client transport security for the exporter's connection.
+            insecure: false
+
+meter_provider:
+  readers:
+    - pull:
+        exporter:
+          prometheus:
+            host: localhost
+            port: 9999
+    - periodic:
+        exporter:
+          otlp:
+            protocol: http/protobuf
+            endpoint: https://api.honeycomb.io:443
+            headers:
+              - name: x-honeycomb-team
+                value: "${HONEYCOMB_API_KEY}"
+            # Configure compression.
+            compression: gzip
+            # Configure max time (in milliseconds) to wait for each export.
+            timeout: 10000
+            # Configure client transport security for the exporter's connection.
+            insecure: false
+  views:
+
+logger_provider:
+  processors:
+    - simple:
+        exporter:
+          console: {}
+    - batch:
+        exporter:
+          # Configure exporter to be OTLP.
+          otlp:
+            # Configure protocol.
+            protocol: http/protobuf
+            # Configure endpoint.
+            endpoint: https://api.honeycomb.io:443
+            # Configure headers. Entries have higher priority than entries from .headers_list.
+            headers:
+              - name: x-honeycomb-team
+                value: "${HONEYCOMB_API_KEY}"
+            # Configure compression.
+            compression: gzip
+            # # Configure max time (in milliseconds) to wait for each export.
+            timeout: 10000
+            # # Configure client transport security for the exporter's connection.
+            insecure: false
