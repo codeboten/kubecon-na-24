@@ -51,4 +51,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace go.opentelemetry.io/contrib/config => ../../dev/opentelemetry-go-contrib/config
+replace go.opentelemetry.io/contrib/config => github.com/codeboten/opentelemetry-go-contrib/config v0.0.0-20241011203449-e08dc292f133
