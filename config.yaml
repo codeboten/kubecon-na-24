@@ -1,5 +1,5 @@
 file_format: "0.3"
-enabled: true
+disabled: false
 tracer_provider:
   processors:
     - simple:
