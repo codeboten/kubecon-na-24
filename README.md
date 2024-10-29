@@ -6,7 +6,7 @@ Observability Day.
 ## Tasks
 
 - [ ] update configuration to add second exporter
-- [ ] add "load" generator
+- [x] add "load" generator
 - [ ] add code to configure OTLP exporters programmatically
 - [ ] add OTel Collector example
 - [x] update import to use PR instead of local copy
