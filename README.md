@@ -7,7 +7,7 @@ Observability Day.
 
 - [ ] update configuration to add second exporter
 - [x] add "load" generator
-- [ ] add code to configure OTLP exporters programmatically
-- [ ] add OTel Collector example
+- [x] add code to configure OTLP exporters programmatically
+- [x] add OTel Collector example
 - [x] update import to use PR instead of local copy
 - [x] test the config in php: otlp export isn't configurable

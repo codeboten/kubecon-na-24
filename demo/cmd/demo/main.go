@@ -10,8 +10,11 @@ import (
 
 	"go.opentelemetry.io/contrib/config"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/exporters/prometheus"
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutlog"
-	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/log/global"
 	"go.opentelemetry.io/otel/propagation"
@@ -26,7 +29,7 @@ import (
 func main() {
 	ctx := context.Background()
 	// Set up OpenTelemetry.
-	otelShutdown, err := setupOTel(ctx)
+	otelShutdown, err := setupOTelSDK(ctx)
 	if err != nil {
 		log.Fatalf("err: %v\n", err)
 	}
@@ -97,9 +100,25 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 		propagation.Baggage{},
 	))
 
+	endpoint := "api.honeycomb.io:443"
+	headers := map[string]string{
+		"x-honeycomb-team": os.Getenv("HONEYCOMB_API_KEY"),
+	}
+
 	// Set up trace provider.
 	traceExporter, err := stdouttrace.New(
 		stdouttrace.WithPrettyPrint())
+	if err != nil {
+		handleErr(err)
+		return
+	}
+
+	otlptracehttpExporter, err := otlptracehttp.New(ctx,
+		otlptracehttp.WithEndpoint(endpoint),
+		otlptracehttp.WithHeaders(headers),
+		otlptracehttp.WithCompression(otlptracehttp.GzipCompression),
+		otlptracehttp.WithTimeout(10000*time.Millisecond),
+	)
 	if err != nil {
 		handleErr(err)
 		return
@@ -109,22 +128,32 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 		trace.WithBatcher(traceExporter,
 			// Default is 5s. Set to 1s for demonstrative purposes.
 			trace.WithBatchTimeout(time.Second)),
+		trace.WithBatcher(otlptracehttpExporter),
 	)
 
 	shutdownFuncs = append(shutdownFuncs, tracerProvider.Shutdown)
 	otel.SetTracerProvider(tracerProvider)
 
 	// Set up meter provider.
-	metricExporter, err := stdoutmetric.New()
+	metricExporter, err := prometheus.New()
+	if err != nil {
+		handleErr(err)
+		return
+	}
+
+	otlpmetrichttpExporter, err := otlpmetrichttp.New(ctx,
+		otlpmetrichttp.WithEndpoint(endpoint),
+		otlpmetrichttp.WithHeaders(headers),
+		otlpmetrichttp.WithCompression(otlpmetrichttp.GzipCompression),
+		otlpmetrichttp.WithTimeout(10000*time.Millisecond))
 	if err != nil {
 		handleErr(err)
 		return
 	}
 
 	meterProvider := metric.NewMeterProvider(
-		metric.WithReader(metric.NewPeriodicReader(metricExporter,
-			// Default is 1m. Set to 3s for demonstrative purposes.
-			metric.WithInterval(3*time.Second))),
+		metric.WithReader(metricExporter),
+		metric.WithReader(metric.NewPeriodicReader(otlpmetrichttpExporter)),
 	)
 	shutdownFuncs = append(shutdownFuncs, meterProvider.Shutdown)
 	otel.SetMeterProvider(meterProvider)
@@ -136,8 +165,19 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 		return
 	}
 
+	otlploghttpExporter, err := otlploghttp.New(ctx,
+		otlploghttp.WithEndpoint(endpoint),
+		otlploghttp.WithHeaders(headers),
+		otlploghttp.WithCompression(otlploghttp.GzipCompression),
+		otlploghttp.WithTimeout(10000*time.Millisecond))
+	if err != nil {
+		handleErr(err)
+		return
+	}
+
 	loggerProvider := otellog.NewLoggerProvider(
 		otellog.WithProcessor(otellog.NewBatchProcessor(logExporter)),
+		otellog.WithProcessor(otellog.NewBatchProcessor(otlploghttpExporter)),
 	)
 	shutdownFuncs = append(shutdownFuncs, loggerProvider.Shutdown)
 	global.SetLoggerProvider(loggerProvider)
