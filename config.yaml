@@ -1,5 +1,14 @@
 file_format: "0.3"
 disabled: false
+resource:
+  schema_url: https://opentelemetry.io/schemas/1.26.0
+  attributes:
+    - name: service.name
+      value: "${SERVICE_NAME}"
+    - name: service.version
+      value: "${SERVICE_VERSION}"
+    - name: other
+      value: "one-more"
 tracer_provider:
   processors:
     - simple:
@@ -17,8 +26,6 @@ tracer_provider:
             compression: gzip
             # Configure max time (in milliseconds) to wait for each export.
             timeout: 10000
-            # Configure client transport security for the exporter's connection.
-            insecure: false
 
 meter_provider:
   readers:
@@ -39,8 +46,6 @@ meter_provider:
             compression: gzip
             # Configure max time (in milliseconds) to wait for each export.
             timeout: 10000
-            # Configure client transport security for the exporter's connection.
-            insecure: false
   views:
 
 logger_provider:
@@ -64,5 +69,3 @@ logger_provider:
             compression: gzip
             # # Configure max time (in milliseconds) to wait for each export.
             timeout: 10000
-            # # Configure client transport security for the exporter's connection.
-            insecure: false
