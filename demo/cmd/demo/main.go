@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"go.opentelemetry.io/contrib/config"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
@@ -28,8 +29,12 @@ import (
 
 func main() {
 	ctx := context.Background()
+	err := godotenv.Load() // 👈 load .env file
+	if err != nil {
+		log.Fatal(err)
+	}
 	// Set up OpenTelemetry.
-	otelShutdown, err := setupOTelSDK(ctx)
+	otelShutdown, err := setupOTel(ctx)
 	if err != nil {
 		log.Fatalf("err: %v\n", err)
 	}
