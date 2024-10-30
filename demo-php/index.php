@@ -8,12 +8,23 @@ use Slim\Factory\AppFactory;
 
 require __DIR__ . '/vendor/autoload.php';
 
+$env = file_get_contents(__DIR__."/.env");
+$lines = explode("\n",$env);
+
+foreach($lines as $line){
+  preg_match("/([^#]+)\=(.*)/",$line,$matches);
+  if(isset($matches[2])){
+    $_SERVER[$matches[1]] = $matches[2];
+  }
+}
+
 // parse the config file here
 $configuration = Configuration::parseFile(__DIR__ . '/../config.yaml');
-$sdkBuilder = $configuration->create();
-$sdkBuilder->buildAndRegisterGlobal();
+$sdkBuilder = $configuration->create()
+    ->setAutoShutdown(true)
+    ->build();
 
-$tracer = Globals::tracerProvider()->getTracer('demo');
+$tracer = $sdkBuilder->getTracerProvider()->getTracer('o11y-day-na-2024');
 
 $app = AppFactory::create();
 
