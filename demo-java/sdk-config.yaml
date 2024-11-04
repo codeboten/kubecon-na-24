@@ -1,0 +1,95 @@
+file_format: "0.1"
+
+resource:
+  attributes:
+    - name: service.name
+      value: agent-declarative-config
+  detectors:
+    attributes:
+      excluded:
+        - process.command_line
+        - process.command_args
+
+attribute_limits:
+  attribute_value_length_limit: 4095
+
+tracer_provider:
+  processors:
+    - batch:
+        max_export_batch_size: 100
+        exporter:
+          otlp:
+            protocol: http/protobuf
+            endpoint: https://otlp.nr-data.net:4318/v1/traces
+            headers:
+              - name: api-key
+                value: ${NEW_RELIC_API_KEY}
+    - batch:
+        exporter:
+          otlp:
+            protocol: grpc
+            endpoint: http://jaeger:4317/
+  sampler:
+    parent_based:
+      root:
+        rule_based_routing:
+          fallback_sampler:
+            trace_id_ratio_based:
+              ratio: 0.4
+          span_kind: SERVER
+          rules:
+            - action: DROP
+              attribute: url.path
+              pattern: /actuator.*
+
+meter_provider:
+  readers:
+    - pull:
+        exporter:
+          prometheus:
+            port: 9464
+    - periodic:
+        exporter:
+          otlp:
+            protocol: http/protobuf
+            endpoint: https://otlp.nr-data.net:4318/v1/metrics
+            headers:
+              - name: api-key
+                value: ${NEW_RELIC_API_KEY}
+            temporality_preference: delta
+            default_histogram_aggregation: explicit_bucket_histogram
+  views:
+    - selector:
+        instrument_name: jvm.memory.used_after_last_gc
+      stream:
+        aggregation:
+          drop:
+    - selector:
+        instrument_name: http.server.request.duration
+      stream:
+        aggregation:
+          explicit_bucket_histogram:
+            boundaries:
+              - 0.0
+              - 1.0
+              - 5.0
+              - 10.0
+
+logger_provider:
+  processors:
+    - batch:
+        exporter:
+          otlp:
+            protocol: http/protobuf
+            endpoint: https://otlp.nr-data.net:4318/v1/logs
+            headers:
+              - name: api-key
+                value: ${NEW_RELIC_API_KEY}
+
+instrumentation:
+  java:
+    logback-appender:
+      experimental:
+        capture-mdc-attributes:
+          - "*"
+      experimental-log-attributes: true
