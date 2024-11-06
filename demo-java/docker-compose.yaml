@@ -1,0 +1,30 @@
+version: '3'
+services:
+
+  app:
+    build: ./
+    environment:
+      OTEL_EXPERIMENTAL_CONFIG_FILE: /sdk-config.yaml
+      NEW_RELIC_API_KEY: ${NEW_RELIC_API_KEY}
+    ports:
+      - "8080:8080"
+      - "9464:9464"
+    volumes:
+      - ./sdk-config.yaml:/sdk-config.yaml
+    depends_on:
+      - jaeger
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - app
+    ports:
+      - '9090:9090'
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.62.0
+    ports:
+      - '16686:16686'
+      - '4317:4317'
