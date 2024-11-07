@@ -1,6 +1,5 @@
-version: '3'
+version: "3"
 services:
-
   app:
     build: ./
     environment:
@@ -15,16 +14,31 @@ services:
       - jaeger
 
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:v3.0.0-rc.0
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     depends_on:
       - app
     ports:
-      - '9090:9090'
+      - "9090:9090"
+    command:
+      - "--web.enable-otlp-receiver"
+      - "--config.file=/etc/prometheus/prometheus.yml"
 
   jaeger:
     image: jaegertracing/all-in-one:1.62.0
     ports:
-      - '16686:16686'
-      - '4317:4317'
+      - "16686:16686"
+      - "14317:4317"
+      - "14318:4318"
+
+  oteltui:
+    image: ymtdzzz/otel-tui:latest
+    container_name: otel-tui
+    stdin_open: true
+    tty: true
+    # Override entrypoint if you want use options
+    # entrypoint: ["/otel-tui", "--enable-zipkin"]
+    ports:
+      - "4317:4317"
+      - "4318:4318"
