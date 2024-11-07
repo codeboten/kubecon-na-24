@@ -3,7 +3,7 @@
 This repository contains the demo app used during Kubecon NA co-located
 Observability Day.
 
-# Java Demo
+## Java Demo
 
 Build the app image:
 
@@ -23,11 +23,23 @@ Generate load:
 ./load-generator.sh
 ```
 
+## Go Demo
+
+Run the app:
+
+```shell
+cd demo-go
+go run ./cmd/demo/main.go --config ../config.yaml
+```
+
+## Viewing data
+
 View data New Relic, Jaeger, Prometheus:
 
 * Jaeger UI: http://localhost:16686
 * Prometheus UI: http://localhost:9090
 * New Relic: https://one.newrelic.com/
+* Honeycomb: https://ui.honeycomb.io
 
 ## Tasks
 
