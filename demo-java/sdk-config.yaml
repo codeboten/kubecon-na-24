@@ -3,15 +3,7 @@ file_format: "0.1"
 resource:
   attributes:
     - name: service.name
-      value: agent-declarative-config
-  detectors:
-    attributes:
-      excluded:
-        - process.command_line
-        - process.command_args
-
-attribute_limits:
-  attribute_value_length_limit: 4095
+      value: app2
 
 tracer_provider:
   processors:
@@ -20,10 +12,7 @@ tracer_provider:
         exporter:
           otlp:
             protocol: http/protobuf
-            endpoint: https://otlp.nr-data.net:4318/v1/traces
-            headers:
-              - name: api-key
-                value: ${NEW_RELIC_API_KEY}
+            endpoint: http://oteltui:4318/v1/traces
     - batch:
         exporter:
           otlp:
@@ -44,23 +33,21 @@ tracer_provider:
 
 meter_provider:
   readers:
-    - pull:
-        exporter:
-          prometheus:
-            port: 9464
     - periodic:
+        interval: 5000
         exporter:
           otlp:
             protocol: http/protobuf
-            endpoint: https://otlp.nr-data.net:4318/v1/metrics
-            headers:
-              - name: api-key
-                value: ${NEW_RELIC_API_KEY}
-            temporality_preference: delta
-            default_histogram_aggregation: explicit_bucket_histogram
+            endpoint: http://prometheus:9090/api/v1/otlp/v1/metrics
+    - periodic:
+        interval: 5000
+        exporter:
+          otlp:
+            protocol: http/protobuf
+            endpoint: http://oteltui:4318/v1/metrics
   views:
     - selector:
-        instrument_name: jvm.memory.used_after_last_gc
+        instrument_name: jvm.gc.duration
       stream:
         aggregation:
           drop:
@@ -81,10 +68,7 @@ logger_provider:
         exporter:
           otlp:
             protocol: http/protobuf
-            endpoint: https://otlp.nr-data.net:4318/v1/logs
-            headers:
-              - name: api-key
-                value: ${NEW_RELIC_API_KEY}
+            endpoint: http://oteltui:4318/v1/logs
 
 instrumentation:
   java:

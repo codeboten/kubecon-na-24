@@ -14,13 +14,17 @@ docker build .
 
 Run the app:
 ```shell
-export NEW_RELIC_API_KEY=<INSERT_NEW_RELIC_API_KEY>
-docker compose up
+docker compose up -d
 ```
 
 Generate load:
 ```shell
 ./load-generator.sh
+```
+
+Attache Otel terminal UI:
+```shell
+docker compose attach oteltui
 ```
 
 ## Go Demo
@@ -66,7 +70,6 @@ View data New Relic, Jaeger, Prometheus:
 
 * Jaeger UI: http://localhost:16686
 * Prometheus UI: http://localhost:9090
-* New Relic: https://one.newrelic.com/
 * Honeycomb: https://ui.honeycomb.io
 
 ## Tasks
