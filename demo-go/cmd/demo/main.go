@@ -105,10 +105,7 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 		propagation.Baggage{},
 	))
 
-	endpoint := "api.honeycomb.io:443"
-	headers := map[string]string{
-		"x-honeycomb-team": os.Getenv("HONEYCOMB_API_KEY"),
-	}
+	endpoint := "localhost:4318"
 
 	// Set up trace provider.
 	traceExporter, err := stdouttrace.New(
@@ -120,7 +117,7 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 
 	otlptracehttpExporter, err := otlptracehttp.New(ctx,
 		otlptracehttp.WithEndpoint(endpoint),
-		otlptracehttp.WithHeaders(headers),
+		otlptracehttp.WithInsecure(),
 		otlptracehttp.WithCompression(otlptracehttp.GzipCompression),
 		otlptracehttp.WithTimeout(10000*time.Millisecond),
 	)
@@ -148,7 +145,7 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 
 	otlpmetrichttpExporter, err := otlpmetrichttp.New(ctx,
 		otlpmetrichttp.WithEndpoint(endpoint),
-		otlpmetrichttp.WithHeaders(headers),
+		otlpmetrichttp.WithInsecure(),
 		otlpmetrichttp.WithCompression(otlpmetrichttp.GzipCompression),
 		otlpmetrichttp.WithTimeout(10000*time.Millisecond))
 	if err != nil {
@@ -172,7 +169,7 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 
 	otlploghttpExporter, err := otlploghttp.New(ctx,
 		otlploghttp.WithEndpoint(endpoint),
-		otlploghttp.WithHeaders(headers),
+		otlploghttp.WithInsecure(),
 		otlploghttp.WithCompression(otlploghttp.GzipCompression),
 		otlploghttp.WithTimeout(10000*time.Millisecond))
 	if err != nil {
