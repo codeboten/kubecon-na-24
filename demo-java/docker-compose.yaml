@@ -1,24 +1,34 @@
-version: "3"
 services:
-  app:
+  app1:
+    build: ./
+    environment:
+      OTEL_SERVICE_NAME: app1
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://oteltui:4318/
+      OTEL_METRIC_EXPORT_INTERVAL: 5000
+    ports:
+      - "8080:8080"
+    depends_on:
+      - jaeger
+      - oteltui
+      - prometheus
+
+  app2:
     build: ./
     environment:
       OTEL_EXPERIMENTAL_CONFIG_FILE: /sdk-config.yaml
-      NEW_RELIC_API_KEY: ${NEW_RELIC_API_KEY}
     ports:
-      - "8080:8080"
-      - "9464:9464"
+      - "8081:8080"
     volumes:
       - ./sdk-config.yaml:/sdk-config.yaml
     depends_on:
       - jaeger
+      - oteltui
+      - prometheus
 
   prometheus:
     image: prom/prometheus:v3.0.0-rc.0
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    depends_on:
-      - app
     ports:
       - "9090:9090"
     command:
@@ -30,15 +40,11 @@ services:
     ports:
       - "16686:16686"
       - "14317:4317"
-      - "14318:4318"
 
   oteltui:
     image: ymtdzzz/otel-tui:latest
     container_name: otel-tui
     stdin_open: true
     tty: true
-    # Override entrypoint if you want use options
-    # entrypoint: ["/otel-tui", "--enable-zipkin"]
     ports:
-      - "4317:4317"
       - "4318:4318"
