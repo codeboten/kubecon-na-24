@@ -29,16 +29,16 @@ import (
 
 func main() {
 	ctx := context.Background()
-	err := godotenv.Load() // 👈 load .env file
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatal(err)
 	}
-	// Set up OpenTelemetry.
-	otelShutdown, err := setupOTel(ctx)
+
+	otelShutdown, err := setupOTelSDK(ctx)
 	if err != nil {
 		log.Fatalf("err: %v\n", err)
 	}
-	// Handle shutdown properly so nothing leaks.
+
 	defer func() {
 		err = errors.Join(err, otelShutdown(context.Background()))
 		log.Fatalf("err: %v\n", err)
