@@ -17,35 +17,19 @@ tracer_provider:
     - batch:
         exporter:
           otlp:
-            protocol: http/protobuf
-            endpoint: https://api.honeycomb.io:443
-            headers:
-              - name: x-honeycomb-team
-                value: "${HONEYCOMB_API_KEY}"
-            # Configure compression.
-            compression: gzip
-            # Configure max time (in milliseconds) to wait for each export.
-            timeout: 10000
+            protocol: grpc/protobuf
+            endpoint: http://localhost:4317
 
 meter_provider:
   readers:
-    - pull:
+    - periodic:
         exporter:
-          prometheus:
-            host: localhost
-            port: 9999
+          console: {}
     - periodic:
         exporter:
           otlp:
             protocol: http/protobuf
-            endpoint: https://api.honeycomb.io:443
-            headers:
-              - name: x-honeycomb-team
-                value: "${HONEYCOMB_API_KEY}"
-            # Configure compression.
-            compression: gzip
-            # Configure max time (in milliseconds) to wait for each export.
-            timeout: 10000
+            endpoint: http://localhost:4318
   views:
 
 logger_provider:
@@ -55,17 +39,6 @@ logger_provider:
           console: {}
     - batch:
         exporter:
-          # Configure exporter to be OTLP.
           otlp:
-            # Configure protocol.
             protocol: http/protobuf
-            # Configure endpoint.
-            endpoint: https://api.honeycomb.io:443
-            # Configure headers. Entries have higher priority than entries from .headers_list.
-            headers:
-              - name: x-honeycomb-team
-                value: "${HONEYCOMB_API_KEY}"
-            # Configure compression.
-            compression: gzip
-            # # Configure max time (in milliseconds) to wait for each export.
-            timeout: 10000
+            endpoint: http://localhost:4318
