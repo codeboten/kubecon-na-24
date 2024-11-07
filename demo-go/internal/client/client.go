@@ -96,7 +96,7 @@ func makeRequest(ctx context.Context, addr string) {
 	}
 
 	// Make sure we pass the context to the request to avoid broken traces.
-	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("http://%s/roll/", addr), nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("http://%s/rolldice/", addr), nil)
 	if err != nil {
 		handleErr(err, "failed to http request")
 	}
