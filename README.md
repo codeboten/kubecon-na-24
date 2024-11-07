@@ -29,7 +29,35 @@ Run the app:
 
 ```shell
 cd demo-go
-go run ./cmd/demo/main.go --config ../config.yaml
+make run
+```
+
+Generate load:
+```shell
+./load-generator.sh
+```
+
+## PHP Demo
+
+Run the app:
+
+```shell
+cd demo-php
+make run
+```
+
+Generate load:
+```shell
+./load-generator.sh
+```
+
+## Collector Demo
+
+Run the collector:
+
+```shell
+cd demo-collector
+make run
 ```
 
 ## Viewing data
@@ -49,3 +77,6 @@ View data New Relic, Jaeger, Prometheus:
 - [x] add OTel Collector example
 - [x] update import to use PR instead of local copy
 - [x] test the config in php: otlp export isn't configurable
+- [ ] Containerize php demo
+- [ ] Containerize collector demo
+- [ ] Clients for sending traffic to all services (otel-cli)
