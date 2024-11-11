@@ -66,20 +66,17 @@ make run
 
 ## Viewing data
 
-View data New Relic, Jaeger, Prometheus:
+View data in Jaeger, Prometheus:
 
 * Jaeger UI: http://localhost:16686
 * Prometheus UI: http://localhost:9090
-* Honeycomb: https://ui.honeycomb.io
 
 ## Tasks
 
-- [ ] update configuration to add second exporter
+- [x] update configuration to add second exporter
 - [x] add "load" generator
 - [x] add code to configure OTLP exporters programmatically
 - [x] add OTel Collector example
 - [x] update import to use PR instead of local copy
 - [x] test the config in php: otlp export isn't configurable
-- [ ] Containerize php demo
-- [ ] Containerize collector demo
-- [ ] Clients for sending traffic to all services (otel-cli)
+- [x] Clients for sending traffic to all services (otel-cli)
