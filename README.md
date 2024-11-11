@@ -1,7 +1,7 @@
-# Kubecon NA 2024 demo
+# Simplifying OpenTelemetry with Configuration
 
-This repository contains the demo app used during Kubecon NA co-located
-Observability Day.
+This repository contains the demo app presented during Kubecon NA co-located
+Observability Day (https://sched.co/1izqm).
 
 ## Java Demo
 
