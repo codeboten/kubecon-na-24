@@ -40,6 +40,7 @@ services:
     ports:
       - "16686:16686"
       - "14317:4317"
+      - "14318:4318"
 
   oteltui:
     image: ymtdzzz/otel-tui:latest
