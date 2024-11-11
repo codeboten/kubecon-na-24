@@ -30,9 +30,9 @@ $app = AppFactory::create();
 
 $app->get('/rolldice', function (Request $request, Response $response) use ($tracer) {
     $span = $tracer
-        ->spanBuilder('manual-span')
+        ->spanBuilder('roll')
         ->startSpan();
-    $result = random_int(1,6);
+    $result = random_int(1,20);
     $response->getBody()->write(strval($result));
     $span
         ->addEvent('rolled dice', ['result' => $result])

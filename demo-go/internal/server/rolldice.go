@@ -37,7 +37,7 @@ func rolldice(w http.ResponseWriter, r *http.Request) {
 	ctx, span := tracer.Start(r.Context(), "roll")
 	defer span.End()
 
-	roll := 1 + rand.Intn(6)
+	roll := 1 + rand.Intn(20)
 
 	var msg string
 	if player := r.PathValue("player"); player != "" {
