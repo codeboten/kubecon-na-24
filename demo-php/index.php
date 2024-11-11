@@ -2,6 +2,7 @@
 
 use OpenTelemetry\API\Globals;
 use OpenTelemetry\Config\SDK\Configuration;
+use OpenTelemetry\API\Trace\Propagation\TraceContextPropagator;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
@@ -29,8 +30,10 @@ $tracer = $sdkBuilder->getTracerProvider()->getTracer('o11y-day-na-2024');
 $app = AppFactory::create();
 
 $app->get('/rolldice', function (Request $request, Response $response) use ($tracer) {
+    $context = TraceContextPropagator::getInstance()->extract($request->getHeaders());
     $span = $tracer
         ->spanBuilder('roll')
+        ->setParent($context)
         ->startSpan();
     $result = random_int(1,20);
     $response->getBody()->write(strval($result));
