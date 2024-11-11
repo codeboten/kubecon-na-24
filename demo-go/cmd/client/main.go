@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/contrib/config"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/log/global"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 func main() {
@@ -37,6 +38,7 @@ func main() {
 			log.Printf("err: %v\n", err)
 		}
 	}()
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 	otel.SetTracerProvider(sdk.TracerProvider())
 	otel.SetMeterProvider(sdk.MeterProvider())
 	global.SetLoggerProvider(sdk.LoggerProvider())

@@ -7,17 +7,26 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
 	"time"
 
+	"go.opentelemetry.io/contrib/bridges/otelslog"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/metric"
+)
+
+const name = "kubecon2024/demo-go/client"
+
+var (
+	tracer  = otel.Tracer(name)
+	meter   = otel.Meter(name)
+	logger  = otelslog.NewLogger(name)
+	rollCnt metric.Int64Counter
 )
 
 func handleErr(err error, message string) {
@@ -27,9 +36,6 @@ func handleErr(err error, message string) {
 }
 
 func Run(ctx context.Context, addr string) {
-	tracer := otel.Tracer("demo-client-tracer")
-	meter := otel.Meter("demo-client-meter")
-
 	method, _ := baggage.NewMember("method", "repl")
 	client, _ := baggage.NewMember("client", "cli")
 	bag, _ := baggage.New(method, client)
@@ -67,36 +73,30 @@ func Run(ctx context.Context, addr string) {
 
 	defaultCtx := baggage.ContextWithBaggage(ctx, bag)
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
-	for {
-		startTime := time.Now()
-		ctx, span := tracer.Start(defaultCtx, "ExecuteRequest")
-		makeRequest(ctx, addr)
-		span.End()
-		latencyMs := float64(time.Since(startTime)) / 1e6
-		nr := int(rng.Int31n(7))
-		for i := 0; i < nr; i++ {
-			randLineLength := rng.Int63n(999)
-			lineCounts.Add(ctx, 1, metric.WithAttributes(commonLabels...))
-			lineLengths.Record(ctx, randLineLength, metric.WithAttributes(commonLabels...))
-			// fmt.Printf("#%d: LineLength: %dBy\n", i, randLineLength)
-		}
-
-		requestLatency.Record(ctx, latencyMs, metric.WithAttributes(commonLabels...))
-		requestCount.Add(ctx, 1, metric.WithAttributes(commonLabels...))
-
-		time.Sleep(time.Duration(1) * time.Second)
+	startTime := time.Now()
+	makeRequest(defaultCtx, addr)
+	latencyMs := float64(time.Since(startTime)) / 1e6
+	nr := int(rng.Int31n(7))
+	for i := 0; i < nr; i++ {
+		randLineLength := rng.Int63n(999)
+		lineCounts.Add(ctx, 1, metric.WithAttributes(commonLabels...))
+		lineLengths.Record(ctx, randLineLength, metric.WithAttributes(commonLabels...))
 	}
+
+	requestLatency.Record(ctx, latencyMs, metric.WithAttributes(commonLabels...))
+	requestCount.Add(ctx, 1, metric.WithAttributes(commonLabels...))
 }
 
-func makeRequest(ctx context.Context, addr string) {
-
+func makeRequest(ctx context.Context, endpoint string) {
+	ctx, span := tracer.Start(ctx, "rolling for initiative")
+	defer span.End()
 	// Trace an HTTP client by wrapping the transport
 	client := http.Client{
 		Transport: otelhttp.NewTransport(http.DefaultTransport),
 	}
 
 	// Make sure we pass the context to the request to avoid broken traces.
-	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("http://%s/rolldice/", addr), nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
 	if err != nil {
 		handleErr(err, "failed to http request")
 	}
