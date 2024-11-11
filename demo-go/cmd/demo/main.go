@@ -23,7 +23,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/codeboten/kubecon-na-24/demo/internal/client"
 	"github.com/codeboten/kubecon-na-24/demo/internal/server"
 )
 
@@ -45,8 +44,6 @@ func main() {
 	}()
 
 	addr := "localhost:19999"
-
-	go client.Run(ctx, addr)
 
 	err = server.Run(addr)
 	if err != nil {
