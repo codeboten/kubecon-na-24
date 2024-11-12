@@ -18,5 +18,4 @@ RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/re
 # Download rule_based_routing sampler
 RUN wget https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-samplers/1.40.0-alpha/opentelemetry-samplers-1.40.0-alpha.jar
 
-CMD java -javaagent:opentelemetry-javaagent.jar -Dotel.javaagent.extensions=./opentelemetry-samplers-1.40.0-alpha.jar -jar build/libs/*.jar
-
+CMD java -javaagent:opentelemetry-javaagent.jar -Dotel.javaagent.extensions=./opentelemetry-samplers-1.40.0-alpha.jar -jar build/libs/*.jar --logging.level.org.hibernate.SQL=DEBUG

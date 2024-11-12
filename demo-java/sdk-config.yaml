@@ -29,7 +29,7 @@ tracer_provider:
           rules:
             - action: DROP
               attribute: url.path
-              pattern: /actuator.*
+              pattern: /actuator/health
 
 meter_provider:
   readers:
@@ -73,7 +73,4 @@ logger_provider:
 instrumentation:
   java:
     logback-appender:
-      experimental:
-        capture-mdc-attributes:
-          - "*"
       experimental-log-attributes: true
