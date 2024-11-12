@@ -23,7 +23,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/codeboten/kubecon-na-24/demo/internal/client"
 	"github.com/codeboten/kubecon-na-24/demo/internal/server"
 )
 
@@ -34,6 +33,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 	otelShutdown, err := setupOTelSDK(ctx)
 	if err != nil {
 		log.Fatalf("err: %v\n", err)
@@ -45,8 +45,6 @@ func main() {
 	}()
 
 	addr := "localhost:19999"
-
-	go client.Run(ctx, addr)
 
 	err = server.Run(addr)
 	if err != nil {
@@ -98,12 +96,6 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 	handleErr := func(inErr error) {
 		err = errors.Join(inErr, shutdown(ctx))
 	}
-
-	// Set up propagator.
-	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
-		propagation.TraceContext{},
-		propagation.Baggage{},
-	))
 
 	endpoint := "localhost:4318"
 

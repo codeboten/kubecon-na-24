@@ -9,6 +9,8 @@ resource:
       value: "${OTEL_SERVICE_VERSION}"
     - name: other
       value: "one-more"
+propagator:
+  composite: [ tracecontext, baggage ]
 tracer_provider:
   processors:
     - simple:
@@ -47,8 +49,8 @@ logger_provider:
     # - batch:
     #     exporter:
     #       otlp:
-    #         protocol: grpc/protobuf
-    #         endpoint: http://localhost:14317
+    #         protocol: http/protobuf
+    #         endpoint: http://localhost:14318
 # prometheus
     # - periodic:
     #     interval: 1000

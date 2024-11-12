@@ -2,7 +2,9 @@ receivers:
   otlp:
     protocols:
       grpc:
+        endpoint: 0.0.0.0:24317
       http:
+        endpoint: 0.0.0.0:24318
 exporters:
   debug:
 processors:
